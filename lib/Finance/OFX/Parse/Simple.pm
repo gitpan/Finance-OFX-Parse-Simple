@@ -8,11 +8,11 @@ Finance::OFX::Parse::Simple - Parse a simple OFX file or scalar
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -20,7 +20,7 @@ our $VERSION = '0.01';
 
    my $parser = Finance::OFX::Parse::Simple->new;
 
-   my $data_from_file     = $parser->parse_file("myfile.ofx"); # $data is a reference to a list of hash references
+   my $data_from_file     = $parser->parse_file("myfile.ofx"); # returns a reference to a list of hash references
 
    my $data_from_scalar   = $parser->parse_scalar($ofx_data); 
 
@@ -100,7 +100,7 @@ sub parse_scalar
 	{
 	    my $aa = 0;
 	    
-	    if ($all =~ m:<ACCTID>(\d+)\s*<:s)
+	    if ($all =~ m:<ACCTID>([^<]+?)\s*<:s)
 	    {
 		$aa = $1;
 	    }
