@@ -8,11 +8,11 @@ Finance::OFX::Parse::Simple - Parse a simple OFX file or scalar
 
 =head1 VERSION
 
-Version 0.06
+Version 0.07
 
 =cut
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 =head1 SYNOPSIS
 
@@ -20,7 +20,7 @@ our $VERSION = '0.06';
 
    my $parser = Finance::OFX::Parse::Simple->new;
 
-   my $data_from_file     = $parser->parse_file("myfile.ofx"); # returns a reference to a list of hash references
+   my $data_from_file     = $parser->parse_file("bank-statement.ofx"); # returns a reference to a list of hash references
 
    my $data_from_scalar   = $parser->parse_scalar($ofx_data); 
 
@@ -97,7 +97,7 @@ sub parse_scalar
     };
 
   transaction_group:
-    while ($ofx =~ m!(<STMTTRNRS>(.+?)</STMTTRNRS>)!sg)
+    while ($ofx =~ m!(<(?:CC)?STMTTRNRS>(.+?)</(?:CC)?STMTTRNRS>)!sg)
     {
 	my ($all,$statements) = ($1,$2);
 
@@ -131,16 +131,16 @@ sub parse_scalar
 
 		if ($s =~ m/<TRNAMT>\s*([-+])?\s*        # positive-negative sign $1
 		    (?:(\d+)                             # whole numbers $2
-		     (?:\Q$decimal_separator\E(\d\d)?)?  # optionally followed by fractional number $3
+		     (?:\Q$decimal_separator\E(\d\d?)?)? # optionally followed by fractional number $3
 		     |                                   # or
-		     \Q$decimal_separator\E(\d\d))       # just the fractional part $4
+		     \Q$decimal_separator\E(\d\d?))      # just the fractional part $4
 		    /sx)
 		{
 		    my $posneg = $1 || "";
 		    my $whole  = $2 || 0;
 		    my $frac   = $3 || $4 || 0;
 
-		    $amount = sprintf("%.2f", ($whole + ($frac / 100)) * (($posneg eq '-') 
+		    $amount = sprintf("%.2f", ($whole + ("0.$frac" / 1)) * (($posneg eq '-') 
 									  ? -1 
 									  : 1));
 		}
@@ -197,8 +197,15 @@ Jeremy Jones, C<< <jjones at cpan.org> >>
 
 =head1 BUGS
 
-Please report bugs and feature requests to C<bug-finance-ofx-parse-simple at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Finance-OFX-Parse-Simple>. 
+This module is designed to be used with OFX bank statements, and does
+not currently handle the style of OFX files which are produced by
+credit card companies. Patches to add make this module suitable for
+use with credit card style files are welcome.
+
+Please report bugs and feature requests through Github at
+L<https://github.com/JeremyJones/Finance--OFX--Parse--Simple/issues> or
+through CPAN at 
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Finance-OFX-Parse-Simple>.
 
 =head1 SUPPORT
 
